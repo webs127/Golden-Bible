@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bible/core/managers/color_manager.dart';
 import 'package:bible/core/managers/image_manager.dart';
 import 'package:bible/core/router/route_names.dart';
@@ -42,7 +41,13 @@ class _SplashScreenState extends State<SplashScreen> {
           spacing: 10,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(ImageManager.logo, width: 120, height: 120),
+            Container(
+              width: 120, height: 120,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                image: DecorationImage(image: AssetImage(ImageManager.logo))
+              ),
+            ),
             Text(
               "Golden Bible",
               style: theme.textTheme.headlineLarge?.copyWith(
