@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _bibleSectionNavigatorKey = GlobalKey<NavigatorState>();
+final _bibleNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   initialLocation: '/',
@@ -39,6 +40,7 @@ final router = GoRouter(
           ],
         ),
         StatefulShellBranch(
+          navigatorKey: _bibleNavigatorKey,
           routes: [
             GoRoute(
               path: RouteNames.bibleHome,
@@ -125,6 +127,21 @@ class ScaffoldWithNavBar extends StatelessWidget {
   }
 
   void _onTap(int index) {
+    // Close any open popup menus before switching branches to avoid
+    // "Looking up a deactivated widget's ancestor is unsafe" errors.
+    try {
+      _bibleNavigatorKey.currentState?.popUntil((route) {
+        final rt = route.runtimeType.toString();
+        // Pop any internal PopupMenuRoute entries.
+        if (rt.contains('PopupMenuRoute')) {
+          return false; // keep popping
+        }
+        return true; // stop popping
+      });
+    } catch (_) {
+      // ignore any errors while attempting to close transient routes
+    }
+
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
