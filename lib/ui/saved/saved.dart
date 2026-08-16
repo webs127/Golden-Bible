@@ -2,6 +2,7 @@ import 'package:bible/core/managers/color_manager.dart';
 import 'package:bible/core/models/save.dart';
 import 'package:bible/providers/saved_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:provider/provider.dart';
 
 class SavedScreen extends StatefulWidget {
@@ -48,8 +49,12 @@ class _SavedScreenState extends State<SavedScreen> {
                       )
                     : ListView.builder(
                         itemCount: state.bookmarkLength,
-                        itemBuilder: (context, i) =>
-                            BookmarkWiget(bookmark: state.bookmarks[i]),
+                        itemBuilder: (context, i) => BookmarkWiget(
+                          bookmark: state.bookmarks[i],
+                          onDelete: () {
+                            state.removeBookmark(i);
+                          },
+                        ),
                       ),
                 state.isHighlightsEmpty
                     ? Center(
@@ -79,8 +84,12 @@ class _SavedScreenState extends State<SavedScreen> {
                       )
                     : ListView.builder(
                         itemCount: state.notesLength,
-                        itemBuilder: (context, i) =>
-                            NoteWidget(note: state.notes[i]),
+                        itemBuilder: (context, i) => NoteWidget(
+                          note: state.notes[i],
+                          onDelete: () {
+                            state.removeNote(i);
+                          },
+                        ),
                       ),
               ],
             );
@@ -93,7 +102,8 @@ class _SavedScreenState extends State<SavedScreen> {
 
 class BookmarkWiget extends StatelessWidget {
   final Bookmark bookmark;
-  const BookmarkWiget({super.key, required this.bookmark});
+  final VoidCallback? onDelete;
+  const BookmarkWiget({super.key, required this.bookmark, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +135,27 @@ class BookmarkWiget extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+              PopupMenuButton(
+                color: ColorManager.background1,
+                icon: Icon(Icons.more_vert_outlined),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    onTap: onDelete,
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        Icon(MdiIcons.delete, color: Colors.red,),
+                        Text(
+                          "Delete",
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: ColorManager.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           Text(
@@ -210,7 +240,9 @@ class HighlightWidget extends StatelessWidget {
 
 class NoteWidget extends StatelessWidget {
   final Notes note;
-  const NoteWidget({super.key, required this.note});
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
+  const NoteWidget({super.key, required this.note, this.onDelete, this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +271,42 @@ class NoteWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+              PopupMenuButton(
+                color: ColorManager.background1,
+                icon: Icon(Icons.more_vert_outlined),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    onTap: onEdit,
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        Icon(Icons.edit_outlined),
+                        Text(
+                          "Edit",
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: ColorManager.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    onTap: onDelete,
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        Icon(MdiIcons.delete, color: Colors.red,),
+                        Text(
+                          "Delete",
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: ColorManager.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           Text(

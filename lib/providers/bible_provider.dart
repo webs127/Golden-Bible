@@ -20,6 +20,12 @@ class BibleProvider with ChangeNotifier {
   List<bool> versesOptions = [];
   double textSize;
   FontWeight fontWeight;
+  int tilePerPage = 10;
+  int currentPage = 0;
+  int pageLength = 0;
+  int remainder = 0;
+  int block = 0;
+  bool play = false;
 
   BibleProvider(this._prefs)
     : currentBible = _prefs.getInt(_currentBibleKey) ?? 0,
@@ -46,6 +52,10 @@ class BibleProvider with ChangeNotifier {
   }
 
   Bible? get bible => _bibles[currentBible];
+
+  bool get isRemainderEmpty => remainder == 0;
+
+  int get totalPages => isRemainderEmpty ? block : block + 1;
 
   int _length = 0;
 
@@ -176,26 +186,21 @@ class BibleProvider with ChangeNotifier {
 
   onChanged(String value) => searchWord(value);
 
-  int tilePerPage = 10;
-  int currentPage = 0;
-  int pageLength = 0;
-  int remainder = 0;
-  int block = 0;
-
   calculatePageBlock() {
     block = pageLength ~/ tilePerPage;
     remainder = pageLength % tilePerPage;
   }
-
-  bool get isRemainderEmpty => remainder == 0;
-
-  int get totalPages => isRemainderEmpty ? block : block + 1;
 
   onPageSelected(int value) {
     if (totalPages == 0) return;
     if (value < 0) value = 0;
     if (value >= totalPages) value = totalPages - 1;
     currentPage = value;
+    notifyListeners();
+  }
+
+  onPlayChanged() {
+    play = !play;
     notifyListeners();
   }
 }
