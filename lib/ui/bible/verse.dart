@@ -4,11 +4,13 @@ import 'package:bible/core/models/save.dart';
 import 'package:bible/providers/bible_provider.dart';
 import 'package:bible/providers/saved_provider.dart';
 import 'package:bible/providers/theme_provider.dart';
+import 'package:bible/ui/bible/play.dart';
 import 'package:bible/ui/widgets/addnote_textformfield.dart';
 import 'package:bible/ui/widgets/auto_close_widget.dart';
 import 'package:bible/ui/widgets/option_widget.dart';
 import 'package:bible/ui/widgets/theme_switch.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:provider/provider.dart';
 
 class VerseScreen extends StatefulWidget {
@@ -82,6 +84,29 @@ class _VerseScreenState extends State<VerseScreen> {
                   ),
                 ),
                 IconButton(
+                  onPressed: () {
+                    context.read<BibleProvider>().onPlayChanged();
+                    showModalBottomSheet(
+                      isScrollControlled: true,
+                      shape: const OutlineInputBorder(
+                        borderRadius: BorderRadius.zero,
+                        borderSide: BorderSide.none,
+                      ),
+                      backgroundColor: ColorManager.background,
+                      context: context,
+                      builder: (context) => DraggablePlaySheet(
+                        currentBook: widget.currentBook,
+                      ),
+                    );
+                  },
+                  icon: Icon(
+                    context.watch<BibleProvider>().play
+                        ? MdiIcons.pause
+                        : MdiIcons.play,
+                    color: ColorManager.primary1,
+                  ),
+                ),
+                IconButton(
                   onPressed: currentPageIndex < pageCount - 1
                       ? () {
                           _pageController.nextPage(
@@ -122,7 +147,7 @@ class _VerseScreenState extends State<VerseScreen> {
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       'KJV',
-                                      style: theme.textTheme.titleMedium
+                                      style: theme.textTheme.titleMedium,
                                     ),
                                   ),
                                 ),
@@ -132,7 +157,7 @@ class _VerseScreenState extends State<VerseScreen> {
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       'BBE',
-                                      style: theme.textTheme.titleMedium
+                                      style: theme.textTheme.titleMedium,
                                     ),
                                   ),
                                 ),
@@ -142,18 +167,16 @@ class _VerseScreenState extends State<VerseScreen> {
                                   value: 0,
                                   child: Text(
                                     'KJV',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: ColorManager.grey1,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(color: ColorManager.grey1),
                                   ),
                                 ),
                                 DropdownMenuItem(
                                   value: 1,
                                   child: Text(
                                     'BBE',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: ColorManager.grey1,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(color: ColorManager.grey1),
                                   ),
                                 ),
                               ],
@@ -328,8 +351,8 @@ class _VerseScreenState extends State<VerseScreen> {
                                                                       style: TextStyle(
                                                                         fontWeight:
                                                                             FontWeight.w600,
-                                                                        color:
-                                                                            ColorManager.black,
+                                                                        color: ColorManager
+                                                                            .black,
                                                                       ),
                                                                     ),
                                                                   ),
@@ -341,8 +364,8 @@ class _VerseScreenState extends State<VerseScreen> {
                                                                       style: TextStyle(
                                                                         fontWeight:
                                                                             FontWeight.w600,
-                                                                        color:
-                                                                            ColorManager.black,
+                                                                        color: ColorManager
+                                                                            .black,
                                                                       ),
                                                                     ),
                                                                   ),
@@ -355,8 +378,8 @@ class _VerseScreenState extends State<VerseScreen> {
                                                                       style: TextStyle(
                                                                         fontWeight:
                                                                             FontWeight.w600,
-                                                                        color:
-                                                                            ColorManager.black,
+                                                                        color: ColorManager
+                                                                            .black,
                                                                       ),
                                                                     ),
                                                                   ),
@@ -369,8 +392,8 @@ class _VerseScreenState extends State<VerseScreen> {
                                                                       style: TextStyle(
                                                                         fontWeight:
                                                                             FontWeight.w600,
-                                                                        color:
-                                                                            ColorManager.black,
+                                                                        color: ColorManager
+                                                                            .black,
                                                                       ),
                                                                     ),
                                                                   ),
@@ -401,17 +424,15 @@ class _VerseScreenState extends State<VerseScreen> {
                                         ),
                                   ),
                                 ),
+                                playVersePopUp(context, theme),
                                 PopupMenuItem(
-                                  value: 1,
+                                  value: 2,
                                   onTap: () => context
                                       .read<ThemeProvider>()
                                       .onThemeChanged(),
-                                  child: ThemeSwitch(
-                                    color: ColorManager.black,
-                                  ),
+                                  child: ThemeSwitch(color: ColorManager.black),
                                 ),
                               ],
-                              onSelected: (value) {},
                             ),
                           ],
                         ),
@@ -511,6 +532,183 @@ class _VerseScreenState extends State<VerseScreen> {
           ),
         );
       },
+    );
+  }
+
+  PopupMenuItem<int> playVersePopUp(BuildContext context, ThemeData theme) {
+    return PopupMenuItem(
+      value: 1,
+      onTap: () => {
+        showModalBottomSheet(
+          backgroundColor: ColorManager.background1,
+          context: context,
+          builder: (context) =>
+              Padding(padding: const EdgeInsets.all(16.0), child: PlayVerse(currentBook: widget.currentBook)),
+        ),
+      },
+      child: Row(
+        spacing: 10,
+        children: [
+          Icon(
+            context.read<BibleProvider>().play ? MdiIcons.pause : MdiIcons.play,
+          ),
+          Text(
+            context.read<BibleProvider>().play ? "Pause" : "Play",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: ColorManager.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DraggablePlaySheet extends StatefulWidget {
+  final CurrentBook currentBook;
+  const DraggablePlaySheet({super.key, required this.currentBook});
+
+  @override
+  State<DraggablePlaySheet> createState() => _DraggablePlaySheetState();
+}
+
+class _DraggablePlaySheetState extends State<DraggablePlaySheet>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+  late final Animation<double> _expandAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+      value: 0,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final verseTitle =
+        "${widget.currentBook.name} ${widget.currentBook.chapter}";
+    final screenHeight = MediaQuery.of(context).size.height;
+    final handleHeight = 16.0;
+    final miniHeight = 72.0;
+
+    return AnimatedBuilder(
+      animation: _expandAnimation,
+      builder: (context, child) {
+        final t = _expandAnimation.value;
+        final currentHeight =
+            handleHeight + miniHeight + (screenHeight * 0.5 - handleHeight - miniHeight) * t;
+
+        return GestureDetector(
+          onVerticalDragUpdate: (details) {
+            final delta = -details.primaryDelta! / (screenHeight * 0.85);
+            final newValue = (_animController.value + delta).clamp(0.0, 1.0);
+            _animController.value = newValue;
+          },
+          onVerticalDragEnd: (details) {
+            if (details.primaryVelocity == null) return;
+            if (details.primaryVelocity! < -200 ||
+                _animController.value > 0.3) {
+              _animController.animateTo(1.0);
+            } else {
+              _animController.animateTo(0.0);
+            }
+          },
+          child: Container(
+            height: currentHeight,
+            decoration: BoxDecoration(
+              color: ColorManager.background,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 8, bottom: 4),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: ColorManager.grey,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Opacity(
+                  opacity: (1.0 - t * 2).clamp(0.0, 1.0),
+                  child: IgnorePointer(
+                    ignoring: t > 0.5,
+                    child: SizedBox(
+                      height: miniHeight * (1.0 - t),
+                      child: _buildMiniPlayer(theme, verseTitle),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Opacity(
+                    opacity: (t * 2 - 0.3).clamp(0.0, 1.0),
+                    child: IgnorePointer(
+                      ignoring: t < 0.5,
+                      child: PlayVerse(currentBook: widget.currentBook),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMiniPlayer(ThemeData theme, String verseTitle) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(MdiIcons.bookOpenPageVariant, color: ColorManager.primary),
+              const SizedBox(width: 8),
+              Text(
+                verseTitle,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: ColorManager.primary,
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<BibleProvider>().onPlayChanged();
+            },
+            icon: Icon(
+              context.watch<BibleProvider>().play
+                  ? MdiIcons.pause
+                  : MdiIcons.play,
+              color: ColorManager.primary1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
