@@ -116,24 +116,24 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 16),
-                Card(
-                  child: ListTile(
-                    title: Text(
-                      "Send test notification",
-                      style: theme.textTheme.titleMedium?.copyWith(
-                            color: ColorManager.black
-                          ),
-                    ),
-                    subtitle: Text(
-                      "Shows today's verse now",
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: ColorManager.grey,
-                      ),
-                    ),
-                    trailing: Icon(Icons.notifications_active_outlined),
-                    onTap: () => _sendTest(context),
-                  ),
-                ),
+                // Card(
+                //   child: ListTile(
+                //     title: Text(
+                //       "Send test notification",
+                //       style: theme.textTheme.titleMedium?.copyWith(
+                //             color: ColorManager.black
+                //           ),
+                //     ),
+                //     subtitle: Text(
+                //       "Shows today's verse now",
+                //       style: theme.textTheme.titleSmall?.copyWith(
+                //         color: ColorManager.grey,
+                //       ),
+                //     ),
+                //     trailing: Icon(Icons.notifications_active_outlined),
+                //     onTap: () => _sendTest(context),
+                //   ),
+                // ),
               ],
             ),
           );
