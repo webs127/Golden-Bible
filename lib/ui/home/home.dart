@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   actions: [
                     IconButton(
                       onPressed: () => context.push(RouteNames.settings),
-                      icon: const Icon(Icons.person),
+                      icon: const Icon(Icons.settings_outlined),
                     ),
                   ],
                 ),
