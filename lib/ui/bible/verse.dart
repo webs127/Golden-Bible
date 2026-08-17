@@ -9,6 +9,7 @@ import 'package:bible/ui/bible/play.dart';
 import 'package:bible/ui/widgets/addnote_textformfield.dart';
 import 'package:bible/ui/widgets/auto_close_widget.dart';
 import 'package:bible/ui/widgets/draggable_playsheet.dart';
+import 'package:bible/ui/widgets/highlight_pill.dart';
 import 'package:bible/ui/widgets/option_widget.dart';
 import 'package:bible/ui/widgets/theme_switch.dart';
 import 'package:flutter/material.dart';
@@ -459,6 +460,17 @@ class _VerseScreenState extends State<VerseScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 6.0),
                         itemCount: chapter.verses.length,
                         itemBuilder: (context, i) {
+                          final highlights = context.watch<SavedProvider>().highlights;
+                          final existingHighlightIndex = highlights.indexWhere(
+                            (h) =>
+                                h.book == activeBook.name &&
+                                h.chapter == pageIndex + 1 &&
+                                h.verse == i + 1,
+                          );
+                          final existingHighlight =
+                              existingHighlightIndex != -1
+                                  ? highlights[existingHighlightIndex]
+                                  : null;
                           return ListTile(
                             visualDensity: const VisualDensity(
                               vertical: -4,
@@ -475,12 +487,23 @@ class _VerseScreenState extends State<VerseScreen> {
                               ),
                             ),
                             minLeadingWidth: 15,
-                            title: Text(
-                              chapter.verses[i],
-                              textAlign: TextAlign.justify,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontSize: state.textSize,
-                                fontWeight: state.fontWeight,
+                            title: Container(
+                              decoration: existingHighlight != null
+                                  ? BoxDecoration(
+                                      color: Color(existingHighlight.color).withAlpha(60),
+                                      borderRadius: BorderRadius.circular(4),
+                                    )
+                                  : null,
+                              padding: existingHighlight != null
+                                  ? EdgeInsets.symmetric(horizontal: 4, vertical: 2)
+                                  : null,
+                              child: Text(
+                                chapter.verses[i],
+                                textAlign: TextAlign.justify,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontSize: state.textSize,
+                                  fontWeight: state.fontWeight,
+                                ),
                               ),
                             ),
                             onTap: () {
@@ -490,6 +513,96 @@ class _VerseScreenState extends State<VerseScreen> {
                                 (i < state.versesOptions.length &&
                                     state.versesOptions[i])
                                 ? OptionWidget(
+                                  isHighlighted: existingHighlight != null,
+                                  highlight: () {
+                                    if (existingHighlight != null) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (dialogCtx) => Dialog(
+                                          backgroundColor: ColorManager.background1,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(24),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(20),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  "Remove highlight?",
+                                                  style: theme.textTheme.titleMedium?.copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                    color: ColorManager.black
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.end,
+                                                  spacing: 12,
+                                                  children: [
+                                                    TextButton(
+                                                      onPressed: () => Navigator.pop(dialogCtx),
+                                                      child: Text("Cancel"),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        context.read<SavedProvider>().removeHighlight(
+                                                          existingHighlightIndex,
+                                                        );
+                                                        Navigator.pop(dialogCtx);
+                                                        showBottomSheet(
+                                                          context: context,
+                                                          builder: (ctx) => AutoCloseSheet(
+                                                            text: "Highlight removed",
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Text(
+                                                        "Remove",
+                                                        style: TextStyle(color: Colors.red),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      showDialog(
+                                        context: context,
+                                        builder: (dialogCtx) => Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              HighlightPill(
+                                                onColorSelected: (color) {
+                                                  final highlight = Highlight(
+                                                    book: activeBook.name,
+                                                    chapter: pageIndex + 1,
+                                                    verse: i + 1,
+                                                    value: chapter.verses[i],
+                                                    color: color,
+                                                  );
+                                                  context.read<SavedProvider>().addHighlight(
+                                                    highlight,
+                                                  );
+                                                  Navigator.pop(dialogCtx);
+                                                  showBottomSheet(
+                                                    context: context,
+                                                    builder: (ctx) => AutoCloseSheet(
+                                                      text: "Verse highlighted",
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
                                     bookmark: () {
                                       final bookmark = Bookmark(
                                         book: activeBook.name,
@@ -534,35 +647,6 @@ class _VerseScreenState extends State<VerseScreen> {
           ),
         );
       },
-    );
-  }
-
-  PopupMenuItem<int> playVersePopUp(BuildContext context, ThemeData theme) {
-    final tts = context.read<TtsProvider>();
-    return PopupMenuItem(
-      value: 1,
-      onTap: () => {
-        showModalBottomSheet(
-          backgroundColor: ColorManager.background1,
-          context: context,
-          builder: (context) =>
-              Padding(padding: const EdgeInsets.all(16.0), child: PlayVerse(currentBook: widget.currentBook)),
-        ),
-      },
-      child: Row(
-        spacing: 10,
-        children: [
-          Icon(
-            tts.isPlaying ? MdiIcons.pause : MdiIcons.play,
-          ),
-          Text(
-            tts.isPlaying ? "Pause" : "Play",
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorManager.black,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
