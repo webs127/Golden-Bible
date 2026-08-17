@@ -1,5 +1,6 @@
 import 'package:bible/core/models/bible.dart';
 import 'package:bible/core/router/route_names.dart';
+import 'package:bible/core/router/transitions.dart';
 import 'package:bible/ui/bible/bible.dart';
 import 'package:bible/ui/bible/chapters.dart';
 import 'package:bible/ui/bible/verse.dart';
@@ -35,7 +36,11 @@ final router = GoRouter(
             GoRoute(
               path: RouteNames.landing,
               name: 'Landing',
-              builder: (context, state) => HomeScreen(),
+              pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                transitionsBuilder: AppTransitions.fadeIn,
+                child: HomeScreen(),
+              ),
             ),
           ],
         ),
@@ -50,17 +55,25 @@ final router = GoRouter(
                 GoRoute(
                   path: RouteNames.bibleChapters,
                   name: 'Chapters',
-                  builder: (context, state) {
+                  pageBuilder: (context, state) {
                     final book = state.extra as Book;
-                    return ChaptersScreen(book: book);
+                    return CustomTransitionPage(
+                      key: state.pageKey,
+                      transitionsBuilder: AppTransitions.slideLeft,
+                      child: ChaptersScreen(book: book),
+                    );
                   },
                 ),
                 GoRoute(
                   path: RouteNames.bibleVerse,
                   name: 'Verses',
-                  builder: (context, state) {
+                  pageBuilder: (context, state) {
                     final verses = state.extra as CurrentBook;
-                    return VerseScreen(currentBook: verses);
+                    return CustomTransitionPage(
+                      key: state.pageKey,
+                      transitionsBuilder: AppTransitions.slideLeft,
+                      child: VerseScreen(currentBook: verses),
+                    );
                   },
                 ),
               ],
@@ -91,7 +104,11 @@ final router = GoRouter(
     GoRoute(
       path: RouteNames.settings,
       name: 'Settings',
-      builder: (context, state) => const SettingsScreen(),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        transitionsBuilder: AppTransitions.slideUp,
+        child: const SettingsScreen(),
+      ),
     ),
   ],
 );
