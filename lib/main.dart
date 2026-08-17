@@ -6,6 +6,7 @@ import 'package:bible/providers/devotional_provider.dart';
 import 'package:bible/providers/notification_provider.dart';
 import 'package:bible/providers/saved_provider.dart';
 import 'package:bible/providers/theme_provider.dart';
+import 'package:bible/providers/tts_provider.dart';
 import 'package:bible/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +16,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final notifications = NotificationProvider(prefs);
-  runApp(MyApp(prefs: prefs, notifications: notifications));
+  final tts = TtsProvider();
+  await tts.init();
+  runApp(MyApp(prefs: prefs, notifications: notifications, tts: tts));
   unawaited(_setupNotifications(notifications));
 }
 
@@ -34,10 +37,16 @@ Future<void> _setupNotifications(NotificationProvider notifications) async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.prefs, required this.notifications});
+  const MyApp({
+    super.key,
+    required this.prefs,
+    required this.notifications,
+    required this.tts,
+  });
 
   final SharedPreferences prefs;
   final NotificationProvider notifications;
+  final TtsProvider tts;
 
   // This widget is the root of your application.
   @override
@@ -49,6 +58,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
         ChangeNotifierProvider(create: (_) => SavedProvider(prefs)),
         ChangeNotifierProvider(create: (_) => notifications),
+        ChangeNotifierProvider.value(value: tts),
         ],
       child: Consumer<ThemeProvider>(
         builder: (context, state, __) {
