@@ -5,7 +5,6 @@ import 'package:bible/providers/bible_provider.dart';
 import 'package:bible/providers/saved_provider.dart';
 import 'package:bible/providers/theme_provider.dart';
 import 'package:bible/providers/tts_provider.dart';
-import 'package:bible/ui/bible/play.dart';
 import 'package:bible/ui/widgets/addnote_textformfield.dart';
 import 'package:bible/ui/widgets/auto_close_widget.dart';
 import 'package:bible/ui/widgets/draggable_playsheet.dart';
@@ -15,6 +14,7 @@ import 'package:bible/ui/widgets/theme_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class VerseScreen extends StatefulWidget {
   final CurrentBook currentBook;
@@ -88,7 +88,9 @@ class _VerseScreenState extends State<VerseScreen> {
                 ),
                 IconButton(
                   onPressed: () {
-                    context.read<TtsProvider>().togglePlayPause(widget.currentBook);
+                    context.read<TtsProvider>().togglePlayPause(
+                      widget.currentBook,
+                    );
                     showModalBottomSheet(
                       isScrollControlled: true,
                       shape: const OutlineInputBorder(
@@ -96,10 +98,9 @@ class _VerseScreenState extends State<VerseScreen> {
                         borderSide: BorderSide.none,
                       ),
                       backgroundColor: ColorManager.background,
-                      context: context, 
-                      builder: (context) => DraggablePlaySheet(
-                        currentBook: widget.currentBook,
-                      ),
+                      context: context,
+                      builder: (context) =>
+                          DraggablePlaySheet(currentBook: widget.currentBook),
                     );
                   },
                   icon: Icon(
@@ -460,17 +461,18 @@ class _VerseScreenState extends State<VerseScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 6.0),
                         itemCount: chapter.verses.length,
                         itemBuilder: (context, i) {
-                          final highlights = context.watch<SavedProvider>().highlights;
+                          final highlights = context
+                              .watch<SavedProvider>()
+                              .highlights;
                           final existingHighlightIndex = highlights.indexWhere(
                             (h) =>
                                 h.book == activeBook.name &&
                                 h.chapter == pageIndex + 1 &&
                                 h.verse == i + 1,
                           );
-                          final existingHighlight =
-                              existingHighlightIndex != -1
-                                  ? highlights[existingHighlightIndex]
-                                  : null;
+                          final existingHighlight = existingHighlightIndex != -1
+                              ? highlights[existingHighlightIndex]
+                              : null;
                           return ListTile(
                             visualDensity: const VisualDensity(
                               vertical: -4,
@@ -490,12 +492,17 @@ class _VerseScreenState extends State<VerseScreen> {
                             title: Container(
                               decoration: existingHighlight != null
                                   ? BoxDecoration(
-                                      color: Color(existingHighlight.color).withAlpha(60),
+                                      color: Color(
+                                        existingHighlight.color,
+                                      ).withAlpha(60),
                                       borderRadius: BorderRadius.circular(4),
                                     )
                                   : null,
                               padding: existingHighlight != null
-                                  ? EdgeInsets.symmetric(horizontal: 4, vertical: 2)
+                                  ? EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    )
                                   : null,
                               child: Text(
                                 chapter.verses[i],
@@ -513,96 +520,121 @@ class _VerseScreenState extends State<VerseScreen> {
                                 (i < state.versesOptions.length &&
                                     state.versesOptions[i])
                                 ? OptionWidget(
-                                  isHighlighted: existingHighlight != null,
-                                  highlight: () {
-                                    if (existingHighlight != null) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (dialogCtx) => Dialog(
-                                          backgroundColor: ColorManager.background1,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(24),
+                                    isHighlighted: existingHighlight != null,
+                                    highlight: () {
+                                      if (existingHighlight != null) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (dialogCtx) => Dialog(
+                                            backgroundColor:
+                                                ColorManager.background1,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(20),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    "Remove highlight?",
+                                                    style: theme
+                                                        .textTheme
+                                                        .titleMedium
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          color: ColorManager
+                                                              .black,
+                                                        ),
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    spacing: 12,
+                                                    children: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              dialogCtx,
+                                                            ),
+                                                        child: Text("Cancel"),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          context
+                                                              .read<
+                                                                SavedProvider
+                                                              >()
+                                                              .removeHighlight(
+                                                                existingHighlightIndex,
+                                                              );
+                                                          Navigator.pop(
+                                                            dialogCtx,
+                                                          );
+                                                          showBottomSheet(
+                                                            context: context,
+                                                            builder: (ctx) =>
+                                                                AutoCloseSheet(
+                                                                  text:
+                                                                      "Highlight removed",
+                                                                ),
+                                                          );
+                                                        },
+                                                        child: Text(
+                                                          "Remove",
+                                                          style: TextStyle(
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(20),
+                                        );
+                                      } else {
+                                        showDialog(
+                                          context: context,
+                                          builder: (dialogCtx) => Center(
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Text(
-                                                  "Remove highlight?",
-                                                  style: theme.textTheme.titleMedium?.copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                    color: ColorManager.black
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.end,
-                                                  spacing: 12,
-                                                  children: [
-                                                    TextButton(
-                                                      onPressed: () => Navigator.pop(dialogCtx),
-                                                      child: Text("Cancel"),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        context.read<SavedProvider>().removeHighlight(
-                                                          existingHighlightIndex,
+                                                HighlightPill(
+                                                  onColorSelected: (color) {
+                                                    final highlight = Highlight(
+                                                      book: activeBook.name,
+                                                      chapter: pageIndex + 1,
+                                                      verse: i + 1,
+                                                      value: chapter.verses[i],
+                                                      color: color,
+                                                    );
+                                                    context
+                                                        .read<SavedProvider>()
+                                                        .addHighlight(
+                                                          highlight,
                                                         );
-                                                        Navigator.pop(dialogCtx);
-                                                        showBottomSheet(
-                                                          context: context,
-                                                          builder: (ctx) => AutoCloseSheet(
-                                                            text: "Highlight removed",
+                                                    Navigator.pop(dialogCtx);
+                                                    showBottomSheet(
+                                                      context: context,
+                                                      builder: (ctx) =>
+                                                          AutoCloseSheet(
+                                                            text:
+                                                                "Verse highlighted",
                                                           ),
-                                                        );
-                                                      },
-                                                      child: Text(
-                                                        "Remove",
-                                                        style: TextStyle(color: Colors.red),
-                                                      ),
-                                                    ),
-                                                  ],
+                                                    );
+                                                  },
                                                 ),
                                               ],
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    } else {
-                                      showDialog(
-                                        context: context,
-                                        builder: (dialogCtx) => Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              HighlightPill(
-                                                onColorSelected: (color) {
-                                                  final highlight = Highlight(
-                                                    book: activeBook.name,
-                                                    chapter: pageIndex + 1,
-                                                    verse: i + 1,
-                                                    value: chapter.verses[i],
-                                                    color: color,
-                                                  );
-                                                  context.read<SavedProvider>().addHighlight(
-                                                    highlight,
-                                                  );
-                                                  Navigator.pop(dialogCtx);
-                                                  showBottomSheet(
-                                                    context: context,
-                                                    builder: (ctx) => AutoCloseSheet(
-                                                      text: "Verse highlighted",
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
+                                        );
+                                      }
+                                    },
                                     bookmark: () {
                                       final bookmark = Bookmark(
                                         book: activeBook.name,
@@ -617,6 +649,13 @@ class _VerseScreenState extends State<VerseScreen> {
                                         context: context,
                                         builder: (context) => AutoCloseSheet(
                                           text: "Verse bookmarked succesfully",
+                                        ),
+                                      );
+                                    },
+                                    share: () {
+                                      SharePlus.instance.share(
+                                        ShareParams(
+                                          text: '"${chapter.verses[i]}" — ${activeBook.name} ${pageIndex + 1}:${i + 1}',
                                         ),
                                       );
                                     },

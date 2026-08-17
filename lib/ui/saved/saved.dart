@@ -69,7 +69,12 @@ class _SavedScreenState extends State<SavedScreen> {
                     : ListView.builder(
                         itemCount: state.highlightsLength,
                         itemBuilder: (context, i) =>
-                            HighlightWidget(highlight: state.highlights[i]),
+                            HighlightWidget(
+                              highlight: state.highlights[i],
+                              onDelete: () {
+                            state.removeHighlight(i);
+                          },
+                              ),
                       ),
 
                 state.isNotesEmpty
@@ -183,7 +188,8 @@ class BookmarkWidget extends StatelessWidget {
 
 class HighlightWidget extends StatelessWidget {
   final Highlight highlight;
-  const HighlightWidget({super.key, required this.highlight});
+  final VoidCallback? onDelete;
+  const HighlightWidget({super.key, required this.highlight, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +218,27 @@ class HighlightWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+              PopupMenuButton(
+                color: ColorManager.background1,
+                icon: Icon(Icons.more_vert_outlined),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    onTap: onDelete,
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        Icon(MdiIcons.delete, color: Colors.red,),
+                        Text(
+                          "Delete",
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: ColorManager.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           Text(
