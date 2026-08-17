@@ -22,4 +22,12 @@ class ColorManager {
   static Color button = HexColor.hexString("#F5EEE5");
   static Color appbar = HexColor.hexString("#F5F3F0");
 
+  static const List<int> highlightColors = [
+    0xFFF4B400,
+    0xFF4CAF50,
+    0xFF2196F3,
+    0xFFE91E63,
+    0xFFFF9800,
+  ];
+
 }

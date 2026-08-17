@@ -48,7 +48,6 @@ class MyApp extends StatelessWidget {
   final NotificationProvider notifications;
   final TtsProvider tts;
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -64,6 +63,7 @@ class MyApp extends StatelessWidget {
         builder: (context, state, __) {
           return MaterialApp.router(
             title: "Golden Bible",
+            debugShowCheckedModeBanner: false,
             theme: context.read<ThemeProvider>().theme,
             themeAnimationDuration: const Duration(milliseconds: 600),
             themeAnimationCurve: Curves.easeInOut,

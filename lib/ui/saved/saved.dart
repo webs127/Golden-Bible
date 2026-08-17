@@ -49,7 +49,7 @@ class _SavedScreenState extends State<SavedScreen> {
                       )
                     : ListView.builder(
                         itemCount: state.bookmarkLength,
-                        itemBuilder: (context, i) => BookmarkWiget(
+                        itemBuilder: (context, i) => BookmarkWidget(
                           bookmark: state.bookmarks[i],
                           onDelete: () {
                             state.removeBookmark(i);
@@ -100,10 +100,10 @@ class _SavedScreenState extends State<SavedScreen> {
   }
 }
 
-class BookmarkWiget extends StatelessWidget {
+class BookmarkWidget extends StatelessWidget {
   final Bookmark bookmark;
   final VoidCallback? onDelete;
-  const BookmarkWiget({super.key, required this.bookmark, this.onDelete});
+  const BookmarkWidget({super.key, required this.bookmark, this.onDelete});
 
   @override
   Widget build(BuildContext context) {

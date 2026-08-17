@@ -6,12 +6,14 @@ class OptionWidget extends StatelessWidget {
   final VoidCallback? bookmark;
   final VoidCallback? addnote;
   final VoidCallback? share;
+  final bool isHighlighted;
   const OptionWidget({
     super.key,
     this.highlight,
     this.bookmark,
     this.addnote,
     this.share,
+    this.isHighlighted = false,
   });
 
   @override
@@ -31,7 +33,7 @@ class OptionWidget extends StatelessWidget {
               color: ColorManager.grey1,
               fontWeight: FontWeight.w700,
             ),
-            "Highlight",
+            isHighlighted ? "Unhighlight" : "Highlight",
           ),
         ),
         TextButton.icon(
